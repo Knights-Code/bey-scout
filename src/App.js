@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Scout from './pages/Scout'
+import SignIn from './pages/SignIn'
+import SignUp from './pages/SignUp'
 
 function App() {
   return (
