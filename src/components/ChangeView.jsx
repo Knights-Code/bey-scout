@@ -14,7 +14,7 @@ const ChangeView = ({ center, locations }) => {
     locationBounds.extend([location.lat, location.lng])
   })
 
-  locationBounds.isValid() && map.fitBounds(locationBounds)
+  locationBounds.isValid() && map.fitBounds(locationBounds.pad(0.2))
   return null
 }
 
