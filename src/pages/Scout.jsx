@@ -11,6 +11,7 @@ import ReportMarker from '../components/ReportMarker'
 
 function Scout() {
   const [loading, setLoading] = useState(false)
+  const [searchFor, setSearchFor] = useState('')
   const [reports, setReports] = useState([])
   const [centerMapLocation, setCenterMapLocation] = useState({ lat: 0, lng: 0 })
   const [markerLocations, setMarkerLocations] = useState([])
@@ -18,26 +19,32 @@ function Scout() {
   // Get full list of unique product and component names.
   const searchCandidates = useSearchCandidates()
 
-  const onMutate = async (newValue) => {
-    setLoading(true)
+  const onMutate = (e, newValue) => {
+    e.preventDefault()
+    setSearchFor(newValue)
 
-    // Fetch reports.
-    const reportsResult = await fetchReports(newValue)
-    setReports(reportsResult)
+    const searchForReports = async (productOrComponent) => {
+      setLoading(true)
 
-    if (reportsResult.length > 0) {
-      const reportLocations = reportsResult.map(
-        (report) => report.source.geolocation
-      )
+      // Fetch reports.
+      const reportsResult = await fetchReports(productOrComponent)
+      setReports(reportsResult)
 
-      // Update marker locations.
-      setMarkerLocations(reportLocations)
+      if (reportsResult.length > 0) {
+        const reportLocations = reportsResult.map(
+          (report) => report.source.geolocation
+        )
 
-      // Calculate center location for map.
-      setCenterMapLocation(centerLocation(reportLocations))
+        // Update marker locations.
+        setMarkerLocations(reportLocations)
+
+        // Calculate center location for map.
+        setCenterMapLocation(centerLocation(reportLocations))
+        setLoading(false)
+      }
     }
 
-    setLoading(false)
+    searchForReports(newValue)
   }
 
   if (loading) return <Spinner />
@@ -49,6 +56,7 @@ function Scout() {
         <Autocomplete
           disablePortal
           options={searchCandidates}
+          value={searchFor}
           onChange={onMutate}
           sx={{ width: 300 }}
           renderInput={(params) => (
