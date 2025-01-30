@@ -12,6 +12,29 @@ code {
     monospace;
 }
 
+.formButton,
+.formInput,
+.formInputAddress,
+.formInputName,
+.formInputSmall,
+.formInputFile,
+.formButtonActive {
+  padding: 0.9rem 3rem;
+  background-color: #ffffff;
+  font-weight: 600;
+  border-radius: 1rem;
+  font-size: 1rem;
+  margin: 0.5rem 0.5rem 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.formButtonActive {
+  background-color: #00cc66;
+  color: #ffffff;
+}
+
 .formInput {
   padding: 0.9rem 3rem;
   background-color: #ffffff;
