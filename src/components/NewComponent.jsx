@@ -31,7 +31,7 @@ const NewComponent = ({
   const handleInputChange = (e) => {
     let data = [...newProducts]
 
-    data[productIndex][index][e.target.id] = e.target.value
+    data[productIndex].components[index][e.target.id] = e.target.value
 
     setNewProducts(data)
   }
