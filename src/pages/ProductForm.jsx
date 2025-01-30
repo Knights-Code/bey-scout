@@ -1,18 +1,20 @@
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
 import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
   Box,
   Button,
   ChakraProvider,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
   Heading,
   IconButton,
-  Input,
+  Textarea,
 } from '@chakra-ui/react'
 import { AddIcon } from '@chakra-ui/icons'
 import NewProduct from '../components/NewProduct'
+import parseProducts from '../functions/parseProducts'
 
 const ProductForm = () => {
   // TODO: Fetch existing products to avoid dupes.
@@ -26,6 +28,17 @@ const ProductForm = () => {
     components: [newComponent],
   }
   const [newProducts, setNewProducts] = useState([newProduct])
+  const [textToParse, setTextToParse] = useState('')
+
+  const textToParseChanged = (e) => {
+    setTextToParse(e.target.value)
+  }
+
+  const parseProductsFromText = () => {
+    const parsedProducts = parseProducts(textToParse)
+    console.log(parsedProducts)
+    setNewProducts(parsedProducts)
+  }
 
   const addAnotherProduct = () => {
     const emptyProduct = { ...newProduct }
@@ -85,6 +98,28 @@ const ProductForm = () => {
     <ChakraProvider>
       <Box p={4}>
         <Heading>New Product Form</Heading>
+        <Accordion allowToggle mt={4}>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <Box as='span' flex='1' textAlign='left'>
+                  Parse from text
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel pb={4}>
+              <Textarea
+                placeholder='Enter product titles (one per line)'
+                value={textToParse}
+                onChange={textToParseChanged}
+              />
+              <Button onClick={parseProductsFromText} mt={3}>
+                Parse
+              </Button>
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
         <form onSubmit={onSubmit}>
           {newProducts.map((product, index) => (
             <NewProduct
