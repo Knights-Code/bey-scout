@@ -4,6 +4,9 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
+  Alert,
+  AlertDescription,
+  AlertIcon,
   Box,
   FormControl,
   FormErrorMessage,
@@ -66,37 +69,43 @@ const NewProduct = ({
         <FormErrorMessage>{nameError}</FormErrorMessage>
       </FormControl>
 
-      {components.length > 0 && (
-        <Accordion allowToggle mt={4}>
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <Box as='span' flex='1' textAlign='left'>
-                  Components
-                </Box>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel pb={4}>
-              {components.map((component, index) => (
-                <NewComponent
-                  productIndex={productIndex}
-                  component={component}
-                  newProducts={newProducts}
-                  setNewProducts={setNewProducts}
-                  index={index}
-                  isInvalid={isInvalid}
-                />
-              ))}
-              <IconButton
-                onClick={addAnotherComponent}
-                icon={<AddIcon />}
-                mt={3}
-              />
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
+      {components.length === 0 && (
+        <Alert status='error' mt={4}>
+          <AlertIcon />
+          <AlertDescription>
+            Products must contain at least one component.
+          </AlertDescription>
+        </Alert>
       )}
+      <Accordion allowToggle mt={4}>
+        <AccordionItem>
+          <h2>
+            <AccordionButton>
+              <Box as='span' flex='1' textAlign='left'>
+                Components
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={4}>
+            {components.map((component, index) => (
+              <NewComponent
+                productIndex={productIndex}
+                component={component}
+                newProducts={newProducts}
+                setNewProducts={setNewProducts}
+                index={index}
+                isInvalid={isInvalid}
+              />
+            ))}
+            <IconButton
+              onClick={addAnotherComponent}
+              icon={<AddIcon />}
+              mt={3}
+            />
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
     </>
   )
 }
