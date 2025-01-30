@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import {
   Box,
+  Button,
   ChakraProvider,
   FormControl,
   FormErrorMessage,
@@ -30,11 +31,6 @@ const ProductForm = () => {
     const emptyProduct = { ...newProduct }
 
     setNewProducts([...newProducts, emptyProduct])
-    /* const addedProduct = { ...newProduct }
-    setFormData((prevState) => ({
-      ...prevState,
-      products: [...formData.products, addedProduct],
-    })) */
   }
 
   const isInvalid = ({ field, value }) => {
@@ -79,11 +75,17 @@ const ProductForm = () => {
     return errors
   }
 
+  const onSubmit = (e) => {
+    e.preventDefault()
+
+    console.log(newProducts)
+  }
+
   return (
     <ChakraProvider>
       <Box p={4}>
         <Heading>New Product Form</Heading>
-        <form>
+        <form onSubmit={onSubmit}>
           {newProducts.map((product, index) => (
             <NewProduct
               key={index}
@@ -95,6 +97,9 @@ const ProductForm = () => {
             />
           ))}
           <IconButton onClick={addAnotherProduct} icon={<AddIcon />} mt={3} />
+          <Button mt={4} sx={{ width: '100%' }} type='submit'>
+            Submit
+          </Button>
         </form>
       </Box>
     </ChakraProvider>
