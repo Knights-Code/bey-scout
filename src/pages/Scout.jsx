@@ -71,6 +71,7 @@ function Scout() {
             style={{ height: '100%', width: '100%' }}
             center={[centerMapLocation.lat, centerMapLocation.lng]}
             scrollWheelZoom={true}
+            zoomControl={false}
           >
             <ChangeView
               center={centerMapLocation}
