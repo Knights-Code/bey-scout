@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import {
+  Checkbox,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Heading,
+  HStack,
   Input,
 } from '@chakra-ui/react'
 
@@ -14,6 +17,8 @@ const NewComponent = ({
   index,
   isInvalid,
 }) => {
+  const [useExistingComponent, setUseExistingComponent] = useState(false)
+
   const { name, alias, colour } = component
   const { name: nameError } = isInvalid({
     field: 'COMPONENT_NAME',
@@ -25,7 +30,7 @@ const NewComponent = ({
   })
   const { colour: colourError } = isInvalid({
     field: 'COMPONENT_COLOUR',
-    value: colour,
+    value: { component: component, useExistingComponent: useExistingComponent },
   })
 
   const handleInputChange = (e) => {
@@ -39,41 +44,50 @@ const NewComponent = ({
   return (
     <>
       <Heading as='h3' size='md' mt={4}>{`Component ${index + 1}`}</Heading>
-      <FormControl mt={4} isInvalid={nameError} isRequired>
-        <FormLabel>Name</FormLabel>
-        <Input
-          id='name'
-          type='text'
-          placeholder='Component name'
-          value={name}
-          onChange={handleInputChange}
-        />
-        <FormErrorMessage>{nameError}</FormErrorMessage>
-      </FormControl>
+      <Checkbox
+        isChecked={useExistingComponent}
+        onChange={(e) => setUseExistingComponent((prevState) => !prevState)}
+        mt={4}
+      >
+        Use existing component
+      </Checkbox>
+      <HStack>
+        <FormControl mt={4} isInvalid={nameError} isRequired>
+          <FormLabel>Name</FormLabel>
+          <Input
+            id='name'
+            type='text'
+            placeholder='Component name'
+            value={name}
+            onChange={handleInputChange}
+          />
+          <FormErrorMessage>{nameError}</FormErrorMessage>
+        </FormControl>
 
-      <FormControl mt={4} isInvalid={aliasError}>
-        <FormLabel>Alias</FormLabel>
-        <Input
-          id='alias'
-          type='text'
-          placeholder='Component alias'
-          value={alias}
-          onChange={handleInputChange}
-        />
-        <FormErrorMessage>{aliasError}</FormErrorMessage>
-      </FormControl>
+        <FormControl mt={4} isInvalid={aliasError}>
+          <FormLabel>Alias</FormLabel>
+          <Input
+            id='alias'
+            type='text'
+            placeholder='Component alias'
+            value={alias}
+            onChange={handleInputChange}
+          />
+          <FormErrorMessage>{aliasError}</FormErrorMessage>
+        </FormControl>
 
-      <FormControl mt={4} isInvalid={colourError} isRequired>
-        <FormLabel>Colour</FormLabel>
-        <Input
-          id='colour'
-          type='text'
-          placeholder='Component colour'
-          value={colour}
-          onChange={handleInputChange}
-        />
-        <FormErrorMessage>{colourError}</FormErrorMessage>
-      </FormControl>
+        <FormControl mt={4} isInvalid={colourError}>
+          <FormLabel>Colour</FormLabel>
+          <Input
+            id='colour'
+            type='text'
+            placeholder='Component colour'
+            value={colour}
+            onChange={handleInputChange}
+          />
+          <FormErrorMessage>{colourError}</FormErrorMessage>
+        </FormControl>
+      </HStack>
     </>
   )
 }
