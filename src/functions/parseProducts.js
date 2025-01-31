@@ -43,7 +43,6 @@ const parseProducts = (text) => {
       // blade, ratchet count, ratchet height, bit.
       console.log(`Parsing ${match}`)
 
-      let groupNumber = 0
       let blade = {
         name: '',
         alias: '',
@@ -60,8 +59,8 @@ const parseProducts = (text) => {
         colour: '',
       }
 
-      match.forEach((group) => {
-        switch (groupNumber++) {
+      match.forEach((group, index) => {
+        switch (index) {
           case 0:
             // Skip first group because it contains the
             // full string for the match for some stupid reason.
