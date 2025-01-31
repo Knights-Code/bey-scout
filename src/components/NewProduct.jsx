@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   Accordion,
   AccordionButton,
@@ -24,9 +25,22 @@ const NewProduct = ({
   setNewProducts,
   index: productIndex,
   isInvalid,
+  setProductErrors,
+  setComponentErrors,
 }) => {
   const { name, components } = product
-  const { name: nameError } = isInvalid({ field: 'PRODUCT_NAME', value: name })
+  const { name: nameError } = isInvalid({
+    field: 'PRODUCT_NAME',
+    value: name,
+    productIndex,
+  })
+
+  useEffect(() => {
+    setProductErrors((prevState) => ({
+      ...prevState,
+      [productIndex]: nameError,
+    }))
+  }, [nameError, productIndex])
 
   const handleInputChange = (e) => {
     let data = [...newProducts]
@@ -97,6 +111,7 @@ const NewProduct = ({
                 setNewProducts={setNewProducts}
                 index={index}
                 isInvalid={isInvalid}
+                setComponentErrors={setComponentErrors}
               />
             ))}
             <IconButton
