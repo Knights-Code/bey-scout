@@ -90,6 +90,7 @@ const NewProduct = ({
           <AccordionPanel pb={4}>
             {components.map((component, index) => (
               <NewComponent
+                key={index}
                 productIndex={productIndex}
                 component={component}
                 newProducts={newProducts}
