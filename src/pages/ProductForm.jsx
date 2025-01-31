@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Accordion,
   AccordionButton,
@@ -13,10 +13,14 @@ import {
   Textarea,
 } from '@chakra-ui/react'
 import { AddIcon } from '@chakra-ui/icons'
+import { toast } from 'react-toastify'
+import { collection, getDocs } from 'firebase/firestore'
 import NewProduct from '../components/NewProduct'
 import parseProducts from '../functions/parseProducts'
-import { toast } from 'react-toastify'
 import componentInvalid from '../utilities/componentInvalid'
+import Spinner from '../components/Spinner'
+import { db } from '../firebase.config'
+import productNameExists from '../utilities/productNameExists'
 
 const ProductForm = () => {
   // TODO: Fetch existing products to avoid dupes.
@@ -31,6 +35,51 @@ const ProductForm = () => {
   }
   const [newProducts, setNewProducts] = useState([newProduct])
   const [textToParse, setTextToParse] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [existingProducts, setExistingProducts] = useState([])
+  const [existingComponents, setExistingComponents] = useState([])
+  const [productErrors, setProductErrors] = useState({})
+  const [componentErrors, setComponentErrors] = useState({})
+
+  useEffect(() => {
+    const fetchProductsAndComponents = async () => {
+      setLoading(true)
+
+      const dbProducts = []
+      const dbComponents = []
+
+      try {
+        // Get existing products and save them to state.
+        await getDocs(collection(db, 'products')).then((snapshot) =>
+          snapshot.forEach((doc) => {
+            return dbProducts.push(doc.data())
+          })
+        )
+
+        // Get existing components and save them to state.
+        await getDocs(collection(db, 'components')).then((snapshot) =>
+          snapshot.forEach((doc) => {
+            return dbComponents.push(doc.data())
+          })
+        )
+
+        setExistingProducts(dbProducts)
+        setExistingComponents(dbComponents)
+      } catch (error) {
+        toast.error('Unable to retrieve products and components from DB.')
+        console.log(error)
+      }
+
+      setLoading(false)
+    }
+
+    fetchProductsAndComponents()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  if (loading) {
+    return <Spinner />
+  }
 
   const textToParseChanged = (e) => {
     setTextToParse(e.target.value)
@@ -48,7 +97,7 @@ const ProductForm = () => {
     setNewProducts([...newProducts, emptyProduct])
   }
 
-  const isInvalid = ({ field, value }) => {
+  const isInvalid = ({ field, value, productIndex, componentIndex }) => {
     const errors = {
       name: undefined,
       alias: undefined,
@@ -59,9 +108,7 @@ const ProductForm = () => {
       case 'PRODUCT_NAME':
         if (value === '') {
           errors.name = 'Product name cannot be blank'
-
-          // TODO: Proper duplicate check
-        } else if (value === 'Arrow Wizard 4-80B Starter Pack') {
+        } else if (productNameExists(existingProducts, value)) {
           errors.name =
             'A product with this name already exists in the database'
         }
@@ -79,7 +126,14 @@ const ProductForm = () => {
 
       case 'COMPONENT_COLOUR':
         const { component, useExistingComponent } = value
-        if (componentInvalid(component, useExistingComponent, newProducts)) {
+        if (
+          componentInvalid(
+            component,
+            useExistingComponent,
+            newProducts,
+            existingComponents
+          )
+        ) {
           errors.colour = 'Duplicate components require a unique colour'
         }
 
@@ -96,14 +150,26 @@ const ProductForm = () => {
     e.preventDefault()
 
     // Form-scope validation.
-    newProducts.forEach((newProduct, index) => {
-      if (newProduct.components.length === 0) {
-        toast.error(`Product ${index + 1} has no components`)
+    if (newProducts.some((newProduct) => newProduct.components.length === 0)) {
+      toast.error(`One or more products have no components`)
+      return
+    }
+
+    for (const productIndex in productErrors) {
+      if (productErrors[productIndex]) {
+        // A product field is invalid.
+        toast.error('One or more products have errors')
         return
       }
-    })
+    }
 
-    console.log(newProducts)
+    for (const componentIndex in componentErrors) {
+      if (componentErrors[componentIndex]) {
+        // A component field is invalid.
+        toast.error('One or more components have errors')
+        return
+      }
+    }
   }
 
   return (
@@ -141,6 +207,8 @@ const ProductForm = () => {
               newProducts={newProducts}
               setNewProducts={setNewProducts}
               isInvalid={isInvalid}
+              setProductErrors={setProductErrors}
+              setComponentErrors={setComponentErrors}
             />
           ))}
           <IconButton onClick={addAnotherProduct} icon={<AddIcon />} mt={3} />

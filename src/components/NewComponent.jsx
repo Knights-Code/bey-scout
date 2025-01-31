@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Checkbox,
   FormControl,
@@ -16,6 +16,7 @@ const NewComponent = ({
   setNewProducts,
   index,
   isInvalid,
+  setComponentErrors,
 }) => {
   const [useExistingComponent, setUseExistingComponent] = useState(false)
 
@@ -32,6 +33,13 @@ const NewComponent = ({
     field: 'COMPONENT_COLOUR',
     value: { component: component, useExistingComponent: useExistingComponent },
   })
+
+  useEffect(() => {
+    setComponentErrors((prevState) => ({
+      ...prevState,
+      [index]: nameError || aliasError || colourError,
+    }))
+  }, [nameError, aliasError, colourError, index])
 
   const handleInputChange = (e) => {
     let data = [...newProducts]

@@ -68,6 +68,13 @@ code {
   margin-bottom: 3rem;
 }
 
+.newProductHeader {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .pageContainer {
   margin: 3rem;
 }
