@@ -97,7 +97,7 @@ const ProductForm = () => {
     setNewProducts([...newProducts, emptyProduct])
   }
 
-  const isInvalid = ({ field, value, productIndex, componentIndex }) => {
+  const isInvalid = ({ field, value }) => {
     const errors = {
       name: undefined,
       alias: undefined,
