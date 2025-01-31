@@ -15,6 +15,8 @@ import {
 import { AddIcon } from '@chakra-ui/icons'
 import NewProduct from '../components/NewProduct'
 import parseProducts from '../functions/parseProducts'
+import { toast } from 'react-toastify'
+import componentInvalid from '../utilities/componentInvalid'
 
 const ProductForm = () => {
   // TODO: Fetch existing products to avoid dupes.
@@ -76,9 +78,11 @@ const ProductForm = () => {
         break
 
       case 'COMPONENT_COLOUR':
-        if (value === '') {
-          errors.colour = 'Component colour cannot be blank'
+        const { component, useExistingComponent } = value
+        if (componentInvalid(component, useExistingComponent, newProducts)) {
+          errors.colour = 'Duplicate components require a unique colour'
         }
+
         break
 
       default:
@@ -90,6 +94,14 @@ const ProductForm = () => {
 
   const onSubmit = (e) => {
     e.preventDefault()
+
+    // Form-scope validation.
+    newProducts.forEach((newProduct, index) => {
+      if (newProduct.components.length === 0) {
+        toast.error(`Product ${index + 1} has no components`)
+        return
+      }
+    })
 
     console.log(newProducts)
   }
