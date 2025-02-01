@@ -59,7 +59,12 @@ const ProductForm = () => {
         // Get existing components and save them to state.
         await getDocs(collection(db, 'components')).then((snapshot) =>
           snapshot.forEach((doc) => {
-            return dbComponents.push(doc.data())
+            // We need references for existing components
+            // in case of new products that use them.
+            return dbComponents.push({
+              componentRef: doc.id,
+              component: doc.data(),
+            })
           })
         )
 
@@ -175,10 +180,30 @@ const ProductForm = () => {
 
     // Add to DB.
     // Create unique components, first.
-    const allComponents = newProducts.flatMap((newProduct) => {
+    const formComponents = newProducts.flatMap((newProduct) => {
       return [...newProduct.components]
     })
+
+    const allComponents = formComponents.concat(
+      existingComponents.map((existingComponent) => {
+        const { component: componentData, componentRef } = existingComponent
+        return {
+          name: componentData.name,
+          alias: componentData.alias,
+          colour: componentData.colour,
+          componentRef: componentRef,
+        }
+      })
+    )
+
     const uniqueComponents = []
+
+    allComponents
+      .filter((component) => component.componentRef)
+      .forEach((componentWithRef) => {
+        // Existing components always get a spot.
+        uniqueComponents.push(componentWithRef)
+      })
 
     allComponents.forEach((c) => {
       if (
@@ -217,8 +242,14 @@ const ProductForm = () => {
       }
     }
 
+    // New components are components that don't have a
+    // component reference from the DB yet.
+    const newComponents = uniqueComponents.filter(
+      (component) => !component.componentRef
+    )
+
     const storedComponents = await Promise.all(
-      [...uniqueComponents].map(storeComponent)
+      [...newComponents].map(storeComponent)
     ).catch((error) => {
       setLoading(false)
       toast.error('Failed to store component')
@@ -226,6 +257,16 @@ const ProductForm = () => {
       return
     })
 
+    // Create a collection with both newly-stored and
+    // already-stored components with their references.
+    const allStoredComponents = storedComponents.concat(
+      [...existingComponents].map((existingComponent) => {
+        return {
+          componentRef: existingComponent.componentRef,
+          component: existingComponent.component,
+        }
+      })
+    )
     // Deep breath... now let's create new product data.
     newProducts.forEach(async (newProduct) => {
       const newProductData = {
@@ -236,11 +277,13 @@ const ProductForm = () => {
       // Find component references in stored components.
       newProductData.componentRefs = newProduct.components.map(
         (newProductComponent) => {
-          const storedComponent = storedComponents.find(
-            (storedComponent) =>
-              storedComponent.component.name === newProductComponent.name &&
-              storedComponent.component.colour === newProductComponent.colour
-          )
+          const storedComponent = allStoredComponents
+            .filter((storedComponent) => typeof storedComponent !== 'undefined')
+            .find(
+              (storedComponent) =>
+                storedComponent.component.name === newProductComponent.name &&
+                storedComponent.component.colour === newProductComponent.colour
+            )
 
           if (!storedComponent) {
             setLoading(false)

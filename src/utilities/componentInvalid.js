@@ -21,7 +21,10 @@ const componentInvalid = (
   })
 
   existingComponents.forEach((c) => {
-    if (c.name === component.name && c.colour === component.colour) {
+    if (
+      c.component.name === component.name &&
+      c.component.colour === component.colour
+    ) {
       matchCount++
     }
   })
