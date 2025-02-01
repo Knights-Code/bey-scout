@@ -307,6 +307,7 @@ const ProductForm = () => {
     })
 
     setLoading(false)
+    toast.success('New product(s) successfully added to DB')
   }
 
   return (
