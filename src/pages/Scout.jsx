@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Autocomplete from '@mui/material/Autocomplete'
 import { TextField } from '@mui/material'
 import { MapContainer, TileLayer } from 'react-leaflet'
@@ -8,16 +8,48 @@ import Spinner from '../components/Spinner'
 import centerLocation from '../utilities/centerLocation'
 import ChangeView from '../components/ChangeView'
 import ReportMarker from '../components/ReportMarker'
+import fetchProductsAndComponents from '../functions/fetchProductsAndComponents'
 
 function Scout() {
   const [loading, setLoading] = useState(false)
+  const [searchCandidates, setSearchCandidates] = useState([])
+  const [products, setProducts] = useState([])
+  const [components, setComponents] = useState([])
   const [searchFor, setSearchFor] = useState('')
   const [reports, setReports] = useState([])
   const [centerMapLocation, setCenterMapLocation] = useState({ lat: 0, lng: 0 })
   const [markerLocations, setMarkerLocations] = useState([])
 
-  // Get full list of unique product and component names.
-  const searchCandidates = useSearchCandidates()
+  useEffect(() => {
+    const fetchAndSetSearchCandidates = async () => {
+      const { products: dbProducts, components: dbComponents } =
+        await fetchProductsAndComponents(setLoading)
+
+      const candidates = []
+
+      dbProducts.forEach((product) => {
+        candidates.push(product.name)
+      })
+
+      dbComponents.forEach((payload) => {
+        const dbComponentName = payload.component.name
+        if (!candidates.some((candidate) => candidate === dbComponentName)) {
+          candidates.push(dbComponentName)
+        }
+      })
+
+      // Sort by string length.
+      candidates.sort((a, b) => {
+        return a.length - b.length
+      })
+
+      setProducts(dbProducts)
+      setComponents(dbComponents)
+      setSearchCandidates(candidates)
+    }
+
+    fetchAndSetSearchCandidates()
+  }, [])
 
   const onMutate = (e, newValue) => {
     e.preventDefault()
