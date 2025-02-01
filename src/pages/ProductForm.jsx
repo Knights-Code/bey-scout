@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react'
 import { AddIcon } from '@chakra-ui/icons'
 import { toast } from 'react-toastify'
-import { collection, getDocs } from 'firebase/firestore'
+import { addDoc, collection, getDocs } from 'firebase/firestore'
 import NewProduct from '../components/NewProduct'
 import parseProducts from '../functions/parseProducts'
 import componentInvalid from '../utilities/componentInvalid'
@@ -146,8 +146,10 @@ const ProductForm = () => {
     return errors
   }
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
+
+    setLoading(true)
 
     // Form-scope validation.
     if (newProducts.some((newProduct) => newProduct.components.length === 0)) {
@@ -170,6 +172,98 @@ const ProductForm = () => {
         return
       }
     }
+
+    // Add to DB.
+    // Create unique components, first.
+    const allComponents = newProducts.flatMap((newProduct) => {
+      return [...newProduct.components]
+    })
+    const uniqueComponents = []
+
+    allComponents.forEach((c) => {
+      if (
+        !uniqueComponents.some(
+          (uc) => uc.name === c.name && uc.colour === c.colour
+        )
+      ) {
+        return uniqueComponents.push(c)
+      }
+    })
+
+    // Function that stores component in DB and returns
+    // document reference for it as well as the component
+    // itself.
+    const storeComponent = async (component) => {
+      const newComponentData = {
+        name: component.name,
+        alias: component.alias,
+        colour: component.colour,
+        imageUrl: '',
+      }
+      try {
+        const docRef = await addDoc(
+          collection(db, 'components'),
+          newComponentData
+        )
+        return {
+          componentRef: docRef.id,
+          component: component,
+        }
+      } catch (error) {
+        setLoading(false)
+        toast.error('Failed to store component')
+        console.log(error)
+        return
+      }
+    }
+
+    const storedComponents = await Promise.all(
+      [...uniqueComponents].map(storeComponent)
+    ).catch((error) => {
+      setLoading(false)
+      toast.error('Failed to store component')
+      console.log(error)
+      return
+    })
+
+    // Deep breath... now let's create new product data.
+    newProducts.forEach(async (newProduct) => {
+      const newProductData = {
+        name: newProduct.name,
+        componentRefs: [],
+      }
+
+      // Find component references in stored components.
+      newProductData.componentRefs = newProduct.components.map(
+        (newProductComponent) => {
+          const storedComponent = storedComponents.find(
+            (storedComponent) =>
+              storedComponent.component.name === newProductComponent.name &&
+              storedComponent.component.colour === newProductComponent.colour
+          )
+
+          if (!storedComponent) {
+            setLoading(false)
+            toast.error('Could not match component for product in DB')
+            return
+          }
+
+          return storedComponent.componentRef
+        }
+      )
+
+      // At this point we should (SHOULD) have an object with
+      // product name and component references. 🤞
+      try {
+        await addDoc(collection(db, 'products'), newProductData)
+      } catch (error) {
+        setLoading(false)
+        toast.error('Unable to store product')
+        console.log(error)
+      }
+    })
+
+    setLoading(false)
   }
 
   return (
