@@ -4,6 +4,7 @@ import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import ProductForm from './pages/ProductForm'
 import { ToastContainer } from 'react-toastify'
+import CleanUpForm from './pages/CleanUpForm'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path='/sign-in' element={<SignIn />} />
           <Route path='/sign-up' element={<SignUp />} />
           <Route path='/new-product-form' element={<ProductForm />} />
+          <Route path='/clean-up-form' element={<CleanUpForm />} />
         </Routes>
       </Router>
       <ToastContainer />
