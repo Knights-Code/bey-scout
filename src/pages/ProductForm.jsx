@@ -21,6 +21,7 @@ import componentInvalid from '../utilities/componentInvalid'
 import Spinner from '../components/Spinner'
 import { db } from '../firebase.config'
 import productNameExists from '../utilities/productNameExists'
+import fetchProductsAndComponents from '../functions/fetchProductsAndComponents'
 
 const ProductForm = () => {
   // TODO: Fetch existing products to avoid dupes.
@@ -42,43 +43,11 @@ const ProductForm = () => {
   const [componentErrors, setComponentErrors] = useState({})
 
   useEffect(() => {
-    const fetchProductsAndComponents = async () => {
-      setLoading(true)
+    const { products: dbProducts, components: dbComponents } =
+      fetchProductsAndComponents(setLoading)
 
-      const dbProducts = []
-      const dbComponents = []
-
-      try {
-        // Get existing products and save them to state.
-        await getDocs(collection(db, 'products')).then((snapshot) =>
-          snapshot.forEach((doc) => {
-            return dbProducts.push(doc.data())
-          })
-        )
-
-        // Get existing components and save them to state.
-        await getDocs(collection(db, 'components')).then((snapshot) =>
-          snapshot.forEach((doc) => {
-            // We need references for existing components
-            // in case of new products that use them.
-            return dbComponents.push({
-              componentRef: doc.id,
-              component: doc.data(),
-            })
-          })
-        )
-
-        setExistingProducts(dbProducts)
-        setExistingComponents(dbComponents)
-      } catch (error) {
-        toast.error('Unable to retrieve products and components from DB.')
-        console.log(error)
-      }
-
-      setLoading(false)
-    }
-
-    fetchProductsAndComponents()
+    setExistingProducts(dbProducts)
+    setExistingComponents(dbComponents)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
