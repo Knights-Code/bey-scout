@@ -51,20 +51,47 @@ function Scout() {
     fetchAndSetSearchCandidates()
   }, [])
 
-  const onMutate = (e, newValue) => {
+  const onMutate = async (e, newValue) => {
     e.preventDefault()
     setSearchFor(newValue)
 
     const searchForReports = async (productOrComponent) => {
+      const productNames = []
+      const product = products.find(
+        (product) => product.name === productOrComponent
+      )
+
+      if (product) {
+        productNames.push(product)
+      } else {
+        // This means the search term is a component,
+        // not a product. Find all products that contain
+        // the component.
+        const componentRefs = components
+          .filter((payload) => payload.component.name === productOrComponent)
+          .map((payload) => payload.componentRef)
+
+        const relevantProductNames = products
+          .filter((product) =>
+            product.componentRefs.some((componentRef) =>
+              componentRefs.some((ref) => ref === componentRef)
+            )
+          )
+          .map((product) => product.name)
+
+        productNames.push(...relevantProductNames)
+      }
+
       setLoading(true)
 
       // Fetch reports.
-      const reportsResult = await fetchReports(productOrComponent)
+      const reportsResult = await fetchReports(productNames)
+
       setReports(reportsResult)
 
-      if (reportsResult.length > 0) {
+      if (reportsResult && reportsResult.length > 0) {
         const reportLocations = reportsResult.map(
-          (report) => report.source.geolocation
+          (report) => report.sourceGeolocation
         )
 
         // Update marker locations.
@@ -72,11 +99,12 @@ function Scout() {
 
         // Calculate center location for map.
         setCenterMapLocation(centerLocation(reportLocations))
-        setLoading(false)
       }
+
+      setLoading(false)
     }
 
-    searchForReports(newValue)
+    await searchForReports(newValue)
   }
 
   if (loading) return <Spinner />
@@ -115,8 +143,8 @@ function Scout() {
               url='https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png'
             />
 
-            {reports.map((report) => (
-              <ReportMarker key={report.id} report={report} />
+            {reports.map((report, index) => (
+              <ReportMarker key={index} report={report} />
             ))}
           </MapContainer>
         </div>
