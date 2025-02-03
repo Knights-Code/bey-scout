@@ -5,6 +5,8 @@ import SignUp from './pages/SignUp'
 import ProductForm from './pages/ProductForm'
 import { ToastContainer } from 'react-toastify'
 import CleanUpForm from './pages/CleanUpForm'
+import Navbar from './components/Navbar'
+import NewReportForm from './pages/NewReportForm'
 
 function App() {
   return (
@@ -16,7 +18,9 @@ function App() {
           <Route path='/sign-up' element={<SignUp />} />
           <Route path='/new-product-form' element={<ProductForm />} />
           <Route path='/clean-up-form' element={<CleanUpForm />} />
+          <Route path='/new-report' element={<NewReportForm />} />
         </Routes>
+        <Navbar />
       </Router>
       <ToastContainer />
     </>

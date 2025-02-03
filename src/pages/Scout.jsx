@@ -17,6 +17,7 @@ function Scout() {
   const [components, setComponents] = useState([])
   const [searchFor, setSearchFor] = useState('')
   const [reports, setReports] = useState([])
+  const [searchConducted, setSearchConducted] = useState(false)
   const [centerMapLocation, setCenterMapLocation] = useState({ lat: 0, lng: 0 })
   const [markerLocations, setMarkerLocations] = useState([])
 
@@ -105,13 +106,14 @@ function Scout() {
     }
 
     await searchForReports(newValue)
+    setSearchConducted(true)
   }
 
   if (loading) return <Spinner />
 
   return (
     <div className='pageContainer'>
-      <h1>Bey Scout</h1>
+      <h1 className='pageHeader'>Bey Scout</h1>
       <div className='lookupContainer'>
         <Autocomplete
           disablePortal
@@ -150,7 +152,7 @@ function Scout() {
         </div>
       )}
 
-      {reports.length === 0 && <p>No results found.</p>}
+      {searchConducted && <p>No results found.</p>}
     </div>
   )
 }
