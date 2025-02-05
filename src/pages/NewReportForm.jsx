@@ -11,6 +11,7 @@ import getProduct from '../functions/getProduct'
 import firebaseTimestamp from '../utilities/firebaseTimestamp'
 import { addDoc, collection } from 'firebase/firestore'
 import { db } from '../firebase.config'
+import { LatLng, LatLngBounds } from 'leaflet'
 
 const NewReportForm = () => {
   const [loading, setLoading] = useState(false)
@@ -69,17 +70,33 @@ const NewReportForm = () => {
     // Validate form.
     if (!productName) {
       toast.error('Please select a product')
+      return
     }
 
     if (locationText === '' || !place?.name) {
       toast.error('Please enter a valid location')
-      console.log(place)
+      return
     }
 
     // TODO: Enforce sources being within SA.
+    const southWest = new LatLng(-37.82025109430261, 128.89262007972326)
+    const northEast = new LatLng(-25.993094462179293, 140.99459280784657)
+    const placeCoordinates = new LatLng(
+      place.geometry.location.lat(),
+      place.geometry.location.lng()
+    )
+    const southAustraliaBounds = new LatLngBounds(southWest, northEast)
+
+    if (!southAustraliaBounds.contains(placeCoordinates)) {
+      toast.error(
+        'Locations outside South Australia are not being accepted at this time. Thank you for your understanding. 🙏'
+      )
+      return
+    }
 
     if (price <= 0) {
       toast.error('Please enter a valid price')
+      return
     }
 
     setLoading(true)
