@@ -1,10 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap');
+* {
+  box-sizing: border-box;
+}
+
 body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f2f4f8;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+}
+
+button {
+  outline: none;
+  border: none;
 }
 
 code {
@@ -17,9 +25,8 @@ code {
 .formInputAddress,
 .formInputName,
 .formInputSmall,
-.formInputFile,
-.formButtonActive {
-  padding: 0.9rem 3rem;
+.formInputFile {
+  padding: 0.9rem 1.5rem;
   background-color: #ffffff;
   font-weight: 600;
   border-radius: 1rem;
@@ -28,6 +35,10 @@ code {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.formInputProductName {
+  margin-top: 0.5rem;
 }
 
 .formButtonActive {
@@ -35,22 +46,21 @@ code {
   color: #ffffff;
 }
 
-.formInput {
-  padding: 0.9rem 3rem;
-  background-color: #ffffff;
-  font-weight: 600;
-  border-radius: 1rem;
-  font-size: 1rem;
-  margin: 0.5rem 0.5rem 0 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 .formLabel {
   font-weight: 600;
   margin-top: 1rem;
   display: block;
+}
+
+.formPriceDiv {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.formPriceText {
+  margin-right: 1.5rem;
+  font-weight: 600;
 }
 
 .leafletContainer {
@@ -128,6 +138,21 @@ code {
 .pageHeader {
   font-size: 2rem;
   font-weight: 800;
+}
+
+.primaryButton {
+  cursor: pointer;
+  background: #00cc66;
+  border-radius: 1rem;
+  padding: 0.85rem 2rem;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1.25rem;
+  width: 80%;
+  margin: 2.5rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .loadingSpinnerContainer {
