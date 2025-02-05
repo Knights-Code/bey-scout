@@ -27,8 +27,9 @@ const getOrCreateSource = async (place) => {
     },
   }
 
-  const sourceRef = await addDoc(collection(db, 'sources'), newSource)
-  return sourceRef
+  const docRef = await addDoc(collection(db, 'sources'), newSource)
+
+  return docRef.id
 }
 
 export default getOrCreateSource
