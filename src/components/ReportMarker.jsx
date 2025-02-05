@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Marker, Popup } from 'react-leaflet'
 import moneyFormat from '../utilities/moneyFormat'
 import countDaysBetween from '../utilities/countDaysBetween'
@@ -22,12 +21,11 @@ const ReportMarker = ({ report }) => {
 
   const reportedAt = (timestamp) => {
     const reportDate = new Date(timestamp.seconds * 1000)
-
     const daysBetween = countDaysBetween(now, reportDate)
     let reportString = ''
 
     if (daysBetween === 0) {
-      reportString = `reported today at ${reportDate.getTime()}`
+      reportString = `reported today at ${reportDate.getHours()}:${reportDate.getMinutes()}`
     } else if (daysBetween === 1) {
       reportString = `reported yesterday`
     } else if (daysBetween < 7) {
