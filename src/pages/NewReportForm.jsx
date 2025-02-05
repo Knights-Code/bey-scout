@@ -170,7 +170,7 @@ const NewReportForm = () => {
             />
           </APIProvider>
 
-          <button className='primaryButton button' type='submit'>
+          <button className='primaryButton button submitButton' type='submit'>
             Submit Report
           </button>
         </form>
