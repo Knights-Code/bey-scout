@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import Autocomplete from '@mui/material/Autocomplete'
 import { TextField } from '@mui/material'
 import { MapContainer, TileLayer } from 'react-leaflet'
-import useSearchCandidates from '../hooks/useSearchCandidates'
 import fetchReports from '../functions/fetchReports'
 import Spinner from '../components/Spinner'
 import centerLocation from '../utilities/centerLocation'
@@ -152,7 +151,7 @@ function Scout() {
         </div>
       )}
 
-      {searchConducted && <p>No results found.</p>}
+      {searchConducted && reports.length === 0 && <p>No results found.</p>}
     </div>
   )
 }
