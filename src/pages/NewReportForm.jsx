@@ -161,13 +161,19 @@ const NewReportForm = () => {
             options={searchCandidates}
             value={productName}
             onChange={onMutate}
-            sx={{ width: 300 }}
+            sx={{
+              width: 300,
+              fontFamily: 'Zain, sans-serif',
+              fontWeight: '900',
+              color: '#000000',
+              backgroundColor: '#ffffff',
+              margin: 0,
+              boxSizing: 'border-box',
+            }}
             renderInput={(params) => <TextField {...params} />}
           />
 
-          <label htmlFor='' className='formLabel'>
-            Price
-          </label>
+          <label className='formLabel'>Price</label>
           <div className='formPriceDiv'>
             <p className='formPriceText'>$</p>
             <input
@@ -188,7 +194,7 @@ const NewReportForm = () => {
           </APIProvider>
 
           <button className='primaryButton button submitButton' type='submit'>
-            Submit Report
+            Submit
           </button>
         </form>
       </main>

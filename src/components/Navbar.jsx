@@ -17,7 +17,7 @@ const Navbar = () => {
         <ul className='navbarListItems'>
           <li className='navbarListItem' onClick={() => navigate('/')}>
             <SearchIcon
-              fill={pathMatchRoute('/') ? '#2c2c2c' : '#8f8f8f'}
+              color={pathMatchRoute('/') ? '#a2ff1f' : '#a2ff1f9e'}
               width='36px'
               height='36px'
             />
@@ -36,7 +36,7 @@ const Navbar = () => {
             onClick={() => navigate('/new-report')}
           >
             <EditIcon
-              fill={pathMatchRoute('/new-report') ? '#2c2c2c' : '#8f8f8f'}
+              color={pathMatchRoute('/new-report') ? '#a2ff1f' : '#a2ff1f9e'}
               width='36px'
               height='36px'
             />

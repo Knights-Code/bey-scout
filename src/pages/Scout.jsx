@@ -113,20 +113,28 @@ function Scout() {
   return (
     <div className='pageContainer'>
       <h1 className='pageHeader'>Bey Scout</h1>
+      <p className='lookupLabel'>Product or Part</p>
       <div className='lookupContainer'>
         <Autocomplete
+          className='body'
           disablePortal
           options={searchCandidates}
           value={searchFor}
           onChange={onMutate}
-          sx={{ width: 300 }}
-          renderInput={(params) => (
-            <TextField {...params} label='Product or Component' />
-          )}
+          sx={{
+            width: 300,
+            fontFamily: 'Zain, sans-serif',
+            fontWeight: '900',
+            color: '#000000',
+            backgroundColor: '#ffffff',
+            margin: 0,
+            boxSizing: 'border-box',
+          }}
+          renderInput={(params) => <TextField {...params} />}
         />
       </div>
 
-      {reports.length > 0 && (
+      {reports?.length > 0 && (
         <div className='leafletContainer'>
           <MapContainer
             style={{ height: '100%', width: '100%' }}
@@ -151,7 +159,7 @@ function Scout() {
         </div>
       )}
 
-      {searchConducted && reports.length === 0 && <p>No results found.</p>}
+      {searchConducted && reports?.length === 0 && <p>No results found.</p>}
     </div>
   )
 }
