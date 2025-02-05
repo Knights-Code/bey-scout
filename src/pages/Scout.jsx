@@ -62,7 +62,7 @@ function Scout() {
       )
 
       if (product) {
-        productNames.push(product)
+        productNames.push(product.name)
       } else {
         // This means the search term is a component,
         // not a product. Find all products that contain
