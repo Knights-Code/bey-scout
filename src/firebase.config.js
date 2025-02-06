@@ -6,7 +6,7 @@ import { getFirestore } from 'firebase/firestore'
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: {process.env.REACT_APP_FIREBASE_API_KEY},
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: 'bey-scout.firebaseapp.com',
   projectId: 'bey-scout',
   storageBucket: 'bey-scout.firebasestorage.app',
