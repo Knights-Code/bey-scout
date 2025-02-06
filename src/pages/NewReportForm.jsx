@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Autocomplete as ProductComplete, TextField } from '@mui/material'
 import { APIProvider } from '@vis.gl/react-google-maps'
 import { toast } from 'react-toastify'
 import fetchProducts from '../functions/fetchProducts'
@@ -12,19 +11,19 @@ import firebaseTimestamp from '../utilities/firebaseTimestamp'
 import { addDoc, collection } from 'firebase/firestore'
 import { db } from '../firebase.config'
 import { LatLng, LatLngBounds } from 'leaflet'
+import ProductInput from '../components/ProductInput'
 
 const NewReportForm = () => {
   const [loading, setLoading] = useState(false)
   const [searchCandidates, setSearchCandidates] = useState([])
   const [formData, setFormData] = useState({
-    productName: '',
-    price: 0,
+    listings: [{ productName: '', price: 0 }],
     timestamp: dateToDateTimePickerFormat(new Date()),
   })
   const [locationText, setLocationText] = useState('')
   const [place, setPlace] = useState(null)
 
-  const { productName, price, timestamp } = formData
+  const { listings, timestamp } = formData
 
   useEffect(() => {
     const fetchAndSetSearchCandidates = async () => {
@@ -41,13 +40,8 @@ const NewReportForm = () => {
     fetchAndSetSearchCandidates()
   }, [])
 
-  const onMutate = (e, newValue) => {
-    if (e.target.id.startsWith('productName')) {
-      setFormData((prevState) => ({
-        ...prevState,
-        productName: newValue,
-      }))
-    } else if (e.target.id === 'timestamp') {
+  const onMutate = (e) => {
+    if (e.target.id === 'timestamp') {
       setFormData((prevState) => ({
         ...prevState,
         timestamp: dateToDateTimePickerFormat(new Date(e.target.value)),
@@ -60,16 +54,17 @@ const NewReportForm = () => {
     }
   }
 
-  if (loading) {
-    return <Spinner />
-  }
-
   const onSubmit = async (e) => {
     e.preventDefault()
 
     // Validate form.
-    if (!productName) {
+    if (listings.some((listing) => !listing.productName)) {
       toast.error('Please select a product')
+      return
+    }
+
+    if (listings.some((listing) => listing.price <= 0)) {
+      toast.error('Please enter a valid price')
       return
     }
 
@@ -93,32 +88,41 @@ const NewReportForm = () => {
       return
     }
 
-    if (price <= 0) {
-      toast.error('Please enter a valid price')
-      return
-    }
-
     setLoading(true)
 
     try {
-      // Get product ref.
-      const productRef = await getProduct(productName)
-
       // Get source ref.
       const sourceRef = await getOrCreateSource(place)
 
-      if (productRef === '' || !sourceRef || sourceRef === '') {
+      const reports = []
+      await Promise.all(
+        listings.map(async (listing) => {
+          // Get product ref.
+          const productRef = await getProduct(listing.productName)
+
+          reports.push({
+            productRef,
+            sourceRef,
+            reportedAt: firebaseTimestamp(formData.timestamp),
+            priceInCents: listing.price * 100,
+          })
+        })
+      )
+
+      if (
+        listings.some((listing) => listing.productRef === '') ||
+        !sourceRef ||
+        sourceRef === ''
+      ) {
         toast.error('Failed to submit report. Please try again')
+        return
       }
 
-      const reportData = {
-        priceInCents: price * 100,
-        productRef,
-        sourceRef,
-        reportedAt: firebaseTimestamp(formData.timestamp),
-      }
-
-      await addDoc(collection(db, 'reports'), reportData)
+      await Promise.all(
+        reports.map(async (reportData) => {
+          await addDoc(collection(db, 'reports'), reportData)
+        })
+      )
 
       setLoading(false)
       toast.success('Report successfully submitted')
@@ -132,6 +136,10 @@ const NewReportForm = () => {
   const onLocationTextChange = (e) => {
     setLocationText(e.target.value)
     setPlace(null)
+  }
+
+  if (loading) {
+    return <Spinner />
   }
 
   return (
@@ -152,37 +160,30 @@ const NewReportForm = () => {
             required
           />
 
-          <label className='formLabel'>Product</label>
-          <ProductComplete
-            id='productName'
-            className='formInputProductName'
-            disablePortal
-            options={searchCandidates}
-            value={productName}
-            onChange={onMutate}
-            sx={{
-              width: 300,
-              fontFamily: 'Zain, sans-serif',
-              fontWeight: '900',
-              color: '#000000',
-              backgroundColor: '#ffffff',
-              margin: 0,
-              boxSizing: 'border-box',
-            }}
-            renderInput={(params) => <TextField {...params} />}
-          />
-
-          <label className='formLabel'>Price</label>
-          <div className='formPriceDiv'>
-            <p className='formPriceText'>$</p>
-            <input
-              type='number'
-              className='formInputSmall'
-              id='price'
-              value={price}
-              onChange={onMutate}
+          {listings.map((listing, index) => (
+            <ProductInput
+              key={index}
+              index={index}
+              listing={listing}
+              searchCandidates={searchCandidates}
+              formData={formData}
+              setFormData={setFormData}
             />
-          </div>
+          ))}
+
+          <button
+            className='button addProductButton'
+            type='button'
+            onClick={() =>
+              setFormData((prevState) => {
+                let data = { ...prevState }
+                data.listings = [...listings, { productName: '', price: 0 }]
+                return data
+              })
+            }
+          >
+            Add Product
+          </button>
 
           <label className='formLabel'>Location</label>
           <APIProvider apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
