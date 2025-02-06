@@ -78,7 +78,6 @@ const NewReportForm = () => {
       return
     }
 
-    // TODO: Enforce sources being within SA.
     const southWest = new LatLng(-37.82025109430261, 128.89262007972326)
     const northEast = new LatLng(-25.993094462179293, 140.99459280784657)
     const placeCoordinates = new LatLng(
