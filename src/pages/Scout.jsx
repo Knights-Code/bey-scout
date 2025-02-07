@@ -23,7 +23,11 @@ function Scout() {
   useEffect(() => {
     const fetchAndSetSearchCandidates = async () => {
       const { products: dbProducts, components: dbComponents } =
-        await fetchProductsAndComponents(setLoading)
+        await fetchProductsAndComponents(
+          setLoading,
+          () => {},
+          () => {}
+        )
 
       const candidates = []
 
