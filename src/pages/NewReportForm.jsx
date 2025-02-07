@@ -138,6 +138,12 @@ const NewReportForm = () => {
     setPlace(null)
   }
 
+  const onProductDelete = (index) => {
+    let data = { ...formData }
+    data.listings.splice(index, 1)
+    setFormData(data)
+  }
+
   if (loading) {
     return <Spinner />
   }
@@ -160,6 +166,16 @@ const NewReportForm = () => {
             required
           />
 
+          <label className='formLabel'>Location</label>
+          <APIProvider apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
+            <PlaceAutocomplete
+              onPlaceSelect={setPlace}
+              onTextChange={onLocationTextChange}
+            />
+          </APIProvider>
+
+          <hr />
+
           {listings.map((listing, index) => (
             <ProductInput
               key={index}
@@ -168,6 +184,7 @@ const NewReportForm = () => {
               searchCandidates={searchCandidates}
               formData={formData}
               setFormData={setFormData}
+              onDelete={onProductDelete}
             />
           ))}
 
@@ -184,14 +201,6 @@ const NewReportForm = () => {
           >
             Add Product
           </button>
-
-          <label className='formLabel'>Location</label>
-          <APIProvider apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
-            <PlaceAutocomplete
-              onPlaceSelect={setPlace}
-              onTextChange={onLocationTextChange}
-            />
-          </APIProvider>
 
           <button className='primaryButton button submitButton' type='submit'>
             Submit

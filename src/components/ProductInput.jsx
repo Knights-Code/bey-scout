@@ -1,3 +1,4 @@
+import { MinusIcon } from '@chakra-ui/icons'
 import { Autocomplete, TextField } from '@mui/material'
 
 const ProductInput = ({
@@ -6,6 +7,7 @@ const ProductInput = ({
   searchCandidates,
   formData,
   setFormData,
+  onDelete,
 }) => {
   const { productName, price } = listing
   let productLabel = 'Product'
@@ -33,7 +35,18 @@ const ProductInput = ({
 
   return (
     <>
-      <label className='formLabel'>{productLabel}</label>
+      <div className='productLabelDiv'>
+        <label className='formLabel'>{productLabel}</label>
+        {index > 0 && (
+          <button
+            className='button removeProductButton'
+            type='button'
+            onClick={() => onDelete(index)}
+          >
+            <MinusIcon />
+          </button>
+        )}
+      </div>
       <Autocomplete
         id='productName'
         className='formInputProductName'
@@ -64,6 +77,8 @@ const ProductInput = ({
           onChange={onChange}
         />
       </div>
+
+      <hr />
     </>
   )
 }
