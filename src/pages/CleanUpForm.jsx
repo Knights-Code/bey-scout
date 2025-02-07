@@ -13,7 +13,11 @@ const CleanUpForm = () => {
     const setLooseComponents = async () => {
       // Get all products and components references.
       const { products: dbProducts, components: dbComponents } =
-        await fetchProductsAndComponents(setLoading)
+        await fetchProductsAndComponents(
+          setLoading,
+          () => {},
+          () => {}
+        )
 
       // Iterate over all products and their component
       // references, removing them from the collection of
@@ -39,13 +43,16 @@ const CleanUpForm = () => {
     const componentsToDelete = components.length
 
     try {
-      components.forEach(async (component) => {
-        await deleteDoc(doc(db, 'components', component.componentRef))
-      })
+      await Promise.all(
+        components.map(async (component) => {
+          await deleteDoc(doc(db, 'components', component.componentRef))
+        })
+      )
     } catch (error) {
       setLoading(false)
       toast.error('Unable to delete component')
       console.log(error)
+      return
     }
 
     toast.success(`Successfully deleted ${componentsToDelete} components`)
@@ -58,27 +65,29 @@ const CleanUpForm = () => {
 
   return (
     <div>
-      <h1>Clean-Up Form</h1>
-      <button
-        disabled={!components || components.length === 0}
-        onClick={deleteLooseComponents}
-      >
-        Delete Loose Components
-      </button>
-      <ul>
-        {components &&
-          components.length > 0 &&
-          components.map((component) => (
-            <li key={component.componentRef}>
-              <h3>Reference</h3>
-              <p>{component.componentRef}</p>
-              <h3>Name</h3>
-              <p>{component.component.name}</p>
-              <h3>Colour</h3>
-              <p>{component.component.colour}</p>
-            </li>
-          ))}
-      </ul>
+      <main>
+        <h1>Clean-Up Form</h1>
+        <button
+          disabled={!components || components.length === 0}
+          onClick={deleteLooseComponents}
+        >
+          Delete Loose Components
+        </button>
+        <ul>
+          {components &&
+            components.length > 0 &&
+            components.map((component) => (
+              <li key={component.componentRef}>
+                <h3>Reference</h3>
+                <p>{component.componentRef}</p>
+                <h3>Name</h3>
+                <p>{component.component.name}</p>
+                <h3>Colour</h3>
+                <p>{component.component.colour}</p>
+              </li>
+            ))}
+        </ul>
+      </main>
     </div>
   )
 }

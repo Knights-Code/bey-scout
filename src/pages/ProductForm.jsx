@@ -43,11 +43,11 @@ const ProductForm = () => {
   const [componentErrors, setComponentErrors] = useState({})
 
   useEffect(() => {
-    const { products: dbProducts, components: dbComponents } =
-      fetchProductsAndComponents(setLoading)
-
-    setExistingProducts(dbProducts)
-    setExistingComponents(dbComponents)
+    fetchProductsAndComponents(
+      setLoading,
+      setExistingProducts,
+      setExistingComponents
+    )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -123,10 +123,12 @@ const ProductForm = () => {
   const onSubmit = async (e) => {
     e.preventDefault()
 
+    let errorOccurred = false
     setLoading(true)
 
     // Form-scope validation.
     if (newProducts.some((newProduct) => newProduct.components.length === 0)) {
+      setLoading(false)
       toast.error(`One or more products have no components`)
       return
     }
@@ -134,6 +136,7 @@ const ProductForm = () => {
     for (const productIndex in productErrors) {
       if (productErrors[productIndex]) {
         // A product field is invalid.
+        setLoading(false)
         toast.error('One or more products have errors')
         return
       }
@@ -142,6 +145,7 @@ const ProductForm = () => {
     for (const componentIndex in componentErrors) {
       if (componentErrors[componentIndex]) {
         // A component field is invalid.
+        setLoading(false)
         toast.error('One or more components have errors')
         return
       }
@@ -207,6 +211,7 @@ const ProductForm = () => {
         setLoading(false)
         toast.error('Failed to store component')
         console.log(error)
+        errorOccurred = true
         return
       }
     }
@@ -226,6 +231,10 @@ const ProductForm = () => {
       return
     })
 
+    if (errorOccurred) {
+      return
+    }
+
     // Create a collection with both newly-stored and
     // already-stored components with their references.
     const allStoredComponents = storedComponents.concat(
@@ -236,44 +245,56 @@ const ProductForm = () => {
         }
       })
     )
+
     // Deep breath... now let's create new product data.
-    newProducts.forEach(async (newProduct) => {
-      const newProductData = {
-        name: newProduct.name,
-        componentRefs: [],
-      }
-
-      // Find component references in stored components.
-      newProductData.componentRefs = newProduct.components.map(
-        (newProductComponent) => {
-          const storedComponent = allStoredComponents
-            .filter((storedComponent) => typeof storedComponent !== 'undefined')
-            .find(
-              (storedComponent) =>
-                storedComponent.component.name === newProductComponent.name &&
-                storedComponent.component.colour === newProductComponent.colour
-            )
-
-          if (!storedComponent) {
-            setLoading(false)
-            toast.error('Could not match component for product in DB')
-            return
-          }
-
-          return storedComponent.componentRef
+    await Promise.all(
+      newProducts.map(async (newProduct) => {
+        const newProductData = {
+          name: newProduct.name,
+          componentRefs: [],
         }
-      )
 
-      // At this point we should (SHOULD) have an object with
-      // product name and component references. 🤞
-      try {
-        await addDoc(collection(db, 'products'), newProductData)
-      } catch (error) {
-        setLoading(false)
-        toast.error('Unable to store product')
-        console.log(error)
-      }
-    })
+        // Find component references in stored components.
+        newProductData.componentRefs = newProduct.components.map(
+          (newProductComponent) => {
+            const storedComponent = allStoredComponents
+              .filter(
+                (storedComponent) => typeof storedComponent !== 'undefined'
+              )
+              .find(
+                (storedComponent) =>
+                  storedComponent.component.name === newProductComponent.name &&
+                  storedComponent.component.colour ===
+                    newProductComponent.colour
+              )
+
+            if (!storedComponent) {
+              setLoading(false)
+              toast.error('Could not match component for product in DB')
+              errorOccurred = true
+              return
+            }
+
+            return storedComponent.componentRef
+          }
+        )
+
+        // At this point we should (SHOULD) have an object with
+        // product name and component references. 🤞
+        try {
+          await addDoc(collection(db, 'products'), newProductData)
+        } catch (error) {
+          setLoading(false)
+          toast.error('Unable to store product')
+          errorOccurred = true
+          return
+        }
+      })
+    )
+
+    if (errorOccurred) {
+      return
+    }
 
     setLoading(false)
     toast.success('New product(s) successfully added to DB')

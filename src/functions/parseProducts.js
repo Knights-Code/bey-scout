@@ -18,6 +18,7 @@ const bitNames = {
   R: 'Rush',
   GF: 'Gear Flat',
   C: 'Cyclone',
+  H: 'Hexa',
 }
 
 const PARSE_EXPRESSION =

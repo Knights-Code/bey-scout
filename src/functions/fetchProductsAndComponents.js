@@ -2,7 +2,11 @@ import { collection, getDocs } from 'firebase/firestore'
 import { toast } from 'react-toastify'
 import { db } from '../firebase.config'
 
-const fetchProductsAndComponents = async (setLoading) => {
+const fetchProductsAndComponents = async (
+  setLoading,
+  setProducts,
+  setComponents
+) => {
   setLoading(true)
 
   const dbProducts = []
@@ -33,6 +37,9 @@ const fetchProductsAndComponents = async (setLoading) => {
   }
 
   setLoading(false)
+
+  setProducts(dbProducts)
+  setComponents(dbComponents)
 
   return {
     products: dbProducts,
