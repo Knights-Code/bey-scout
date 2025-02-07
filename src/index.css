@@ -203,11 +203,6 @@ code {
 }
 
 .removeProductButton {
-  /* font-family: 'Zain', sans-serif;
-  font-size: 1rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase; */
   cursor: pointer;
   background: var(--red);
   border-radius: 50%;
@@ -220,8 +215,6 @@ code {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  /* padding: 0.85rem 1rem; */
-  /* margin-top: 1.5rem; */
 }
 
 .productLabelDiv {
@@ -254,6 +247,10 @@ code {
 
 .submitButton {
   margin-bottom: 4rem;
+}
+
+.submitButton:disabled {
+  background-color: var(--color-tertiary);
 }
 
 @keyframes spin {

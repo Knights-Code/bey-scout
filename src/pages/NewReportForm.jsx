@@ -8,10 +8,22 @@ import PlaceAutocomplete from '../components/PlaceAutocomplete'
 import getOrCreateSource from '../functions/getOrCreateSource'
 import getProduct from '../functions/getProduct'
 import firebaseTimestamp from '../utilities/firebaseTimestamp'
-import { addDoc, collection } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  getDocs,
+  orderBy,
+  query,
+  where,
+} from 'firebase/firestore'
 import { db } from '../firebase.config'
 import { LatLng, LatLngBounds } from 'leaflet'
 import ProductInput from '../components/ProductInput'
+import countDaysBetween from '../utilities/countDaysBetween'
+import moneyFormat from '../utilities/moneyFormat'
+import getSource from '../functions/getSource'
+import getProductByReference from '../functions/getProductByReference'
+import { Alert } from '@mui/material'
 
 const NewReportForm = () => {
   const [loading, setLoading] = useState(false)
@@ -22,6 +34,8 @@ const NewReportForm = () => {
   })
   const [locationText, setLocationText] = useState('')
   const [place, setPlace] = useState(null)
+  const [alerts, setAlerts] = useState([])
+  const [relevantAlerts, setRelevantAlerts] = useState([])
 
   const { listings, timestamp } = formData
 
@@ -40,6 +54,87 @@ const NewReportForm = () => {
     fetchAndSetSearchCandidates()
   }, [])
 
+  // Warn user when report for selected location exists for the day already.
+  useEffect(() => {
+    const checkForReports = async () => {
+      if (!place) {
+        setAlerts([])
+        return
+      }
+
+      try {
+        const reportSourceRef = await getSource(place.name)
+
+        if (!reportSourceRef) {
+          // This place doesn't exist in DB, which means
+          // it has never been reported before.
+          setAlerts([])
+          return
+        }
+
+        const reportsForSourceQuery = query(
+          collection(db, 'reports'),
+          where('sourceRef', '==', reportSourceRef),
+          orderBy('reportedAt', 'desc')
+        )
+        const querySnapshot = await getDocs(reportsForSourceQuery)
+
+        if (querySnapshot.empty) {
+          // No reports for this source at all. Unlikely,
+          // but we'll check anyway.
+          setAlerts([])
+          return
+        }
+
+        const reportsForSameDay = querySnapshot.docs.filter((reportDoc) => {
+          const { reportedAt } = reportDoc.data()
+          const currentReportDate = new Date(timestamp)
+
+          const reportDate = new Date(reportedAt.seconds * 1000)
+          const daysBetween = countDaysBetween(currentReportDate, reportDate)
+
+          return daysBetween === 0
+        })
+
+        if (reportsForSameDay.length === 0) {
+          setAlerts([])
+          return
+        }
+
+        const reportAlerts = await Promise.all(
+          reportsForSameDay.map(async (report) => {
+            const { productRef, priceInCents } = report.data()
+            const product = await getProductByReference(productRef)
+
+            return { product: product.name, priceInCents: priceInCents }
+          })
+        )
+
+        toast.warn(
+          'Products have already been reported for this location for the selected date'
+        )
+        setAlerts(reportAlerts)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    checkForReports()
+  }, [timestamp, place])
+
+  // Show alerts pertinent to product information user is reporting.
+  useEffect(() => {
+    const newRelevantAlerts = alerts.filter((alert) =>
+      listings.some(
+        (listing) =>
+          listing.productName === alert.product &&
+          listing.price == alert.priceInCents / 100
+      )
+    )
+
+    setRelevantAlerts(newRelevantAlerts)
+  }, [alerts, formData])
+
   const onMutate = (e) => {
     if (e.target.id === 'timestamp') {
       setFormData((prevState) => ({
@@ -56,6 +151,11 @@ const NewReportForm = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault()
+
+    if (relevantAlerts.length > 0) {
+      // User trying to submit duplicate reports.
+      return
+    }
 
     // Validate form.
     if (listings.some((listing) => !listing.productName)) {
@@ -202,7 +302,18 @@ const NewReportForm = () => {
             Add Product
           </button>
 
-          <button className='primaryButton button submitButton' type='submit'>
+          {relevantAlerts.map((alert, index) => (
+            <Alert sx={{ marginTop: '1rem' }} severity='error' key={index}>
+              {alert.product} already reported at {place.name} on selected date
+              for {moneyFormat(alert.priceInCents)}.
+            </Alert>
+          ))}
+
+          <button
+            className='primaryButton button submitButton'
+            type='submit'
+            disabled={relevantAlerts.length > 0}
+          >
             Submit
           </button>
         </form>

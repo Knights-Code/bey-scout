@@ -1,16 +1,14 @@
-import { addDoc, collection, getDocs, query, where } from 'firebase/firestore'
+import { addDoc, collection } from 'firebase/firestore'
 import { db } from '../firebase.config'
+import getSource from './getSource'
 
 const getOrCreateSource = async (place) => {
   const { name } = place
 
-  const q = query(collection(db, 'sources'), where('name', '==', name))
-  const querySnapshot = await getDocs(q)
+  const existingSource = await getSource(name)
 
-  if (!querySnapshot.empty) {
-    // Source exists, return reference.
-    const ref = querySnapshot.docs[0].id
-    return ref
+  if (existingSource) {
+    return existingSource
   }
 
   // Source does not exist yet. Add to DB, and
