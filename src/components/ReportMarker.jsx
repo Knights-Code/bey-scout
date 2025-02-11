@@ -3,6 +3,7 @@ import moneyFormat from '../utilities/moneyFormat'
 import countDaysBetween from '../utilities/countDaysBetween'
 import markerIcon from '../functions/markerIcon'
 import dayCountToColour from '../utilities/dayCountToColour'
+import minutesFormat from '../utilities/minutesFormat'
 
 const ReportMarker = ({ report }) => {
   const { sourceName, sourceGeolocation: geolocation, listings } = report
@@ -25,7 +26,9 @@ const ReportMarker = ({ report }) => {
     let reportString = ''
 
     if (daysBetween === 0) {
-      reportString = `reported today at ${reportDate.getHours()}:${reportDate.getMinutes()}`
+      reportString = `reported today at ${reportDate.getHours()}:${minutesFormat(
+        reportDate.getMinutes()
+      )}`
     } else if (daysBetween === 1) {
       reportString = `reported yesterday`
     } else if (daysBetween < 7) {
