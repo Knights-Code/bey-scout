@@ -115,55 +115,57 @@ function Scout() {
   if (loading) return <Spinner />
 
   return (
-    <div className='pageContainer'>
-      <h1 className='pageHeader'>Bey Scout</h1>
-      <p className='lookupLabel'>Product or Part</p>
-      <div className='lookupContainer'>
-        <Autocomplete
-          className='body'
-          disablePortal
-          options={searchCandidates}
-          value={searchFor}
-          onChange={onMutate}
-          sx={{
-            width: 300,
-            fontFamily: 'Zain, sans-serif',
-            fontWeight: '900',
-            color: '#000000',
-            backgroundColor: '#ffffff',
-            margin: 0,
-            boxSizing: 'border-box',
-          }}
-          renderInput={(params) => <TextField {...params} />}
-        />
-      </div>
-
-      {reports?.length > 0 && (
-        <div className='leafletContainer'>
-          <MapContainer
-            style={{ height: '100%', width: '100%' }}
-            center={[centerMapLocation.lat, centerMapLocation.lng]}
-            scrollWheelZoom={true}
-            zoomControl={false}
-          >
-            <ChangeView
-              center={centerMapLocation}
-              locations={markerLocations}
-            />
-
-            <TileLayer
-              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-              url='https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png'
-            />
-
-            {reports.map((report, index) => (
-              <ReportMarker key={index} report={report} />
-            ))}
-          </MapContainer>
+    <div className='scoutPageContainer'>
+      <div className='scoutContent'>
+        <h1 className='pageHeader'>Bey Scout</h1>
+        <p className='lookupLabel'>Product or Part</p>
+        <div className='lookupContainer'>
+          <Autocomplete
+            className='body'
+            disablePortal
+            options={searchCandidates}
+            value={searchFor}
+            onChange={onMutate}
+            sx={{
+              width: 300,
+              fontFamily: 'Zain, sans-serif',
+              fontWeight: '900',
+              color: '#000000',
+              backgroundColor: '#ffffff',
+              margin: 0,
+              boxSizing: 'border-box',
+            }}
+            renderInput={(params) => <TextField {...params} />}
+          />
         </div>
-      )}
 
-      {searchConducted && reports?.length === 0 && <p>No results found.</p>}
+        {reports?.length > 0 && (
+          <div className='leafletContainer'>
+            <MapContainer
+              style={{ height: '100%', width: '100%' }}
+              center={[centerMapLocation.lat, centerMapLocation.lng]}
+              scrollWheelZoom={true}
+              zoomControl={false}
+            >
+              <ChangeView
+                center={centerMapLocation}
+                locations={markerLocations}
+              />
+
+              <TileLayer
+                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                url='https://{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png'
+              />
+
+              {reports.map((report, index) => (
+                <ReportMarker key={index} report={report} />
+              ))}
+            </MapContainer>
+          </div>
+        )}
+
+        {searchConducted && reports?.length === 0 && <p>No results found.</p>}
+      </div>
     </div>
   )
 }

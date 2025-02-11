@@ -75,25 +75,38 @@ code {
   margin-bottom: 0;
 }
 
+/* Scout page */
+.scoutPageContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 3rem;
+  padding-bottom: 100px;
+}
+
+.scoutContent {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+}
+
 .leafletContainer {
+  display: flex;
   width: 100%;
-  height: 450px;
-  overflow-x: hidden;
+  flex-grow: 1;
   margin-bottom: 3rem;
+  align-items: center;
 }
 
 .lookupLabel {
   display: flex;
-  justify-content: center;
-  margin-top: 4rem;
+  margin-top: 1rem;
   margin-bottom: 0;
 }
 
 .lookupContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
   margin-bottom: 3rem;
 }
 
@@ -156,6 +169,7 @@ code {
 
 .pageContainer {
   margin: 3rem;
+  margin-bottom: 100px;
 }
 
 .pageHeader {
@@ -165,6 +179,7 @@ code {
   font-size: 3rem;
   font-weight: 800;
   color: var(--color-secondary);
+  align-self: flex-start;
 }
 
 .primaryButton {
