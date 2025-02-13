@@ -142,7 +142,7 @@ function Scout() {
         {reports?.length > 0 && (
           <div className='leafletContainer'>
             <MapContainer
-              style={{ height: '100%', width: '100%' }}
+              style={{ height: '100%', width: '100%', borderRadius: '20px' }}
               center={[centerMapLocation.lat, centerMapLocation.lng]}
               scrollWheelZoom={true}
               zoomControl={false}
