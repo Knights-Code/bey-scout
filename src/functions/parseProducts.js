@@ -19,6 +19,7 @@ const bitNames = {
   GF: 'Gear Flat',
   C: 'Cyclone',
   H: 'Hexa',
+  MN: 'Metal Needle',
 }
 
 const PARSE_EXPRESSION =
