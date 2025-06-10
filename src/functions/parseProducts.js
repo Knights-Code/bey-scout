@@ -14,6 +14,7 @@ const bitNames = {
   R: 'Rush',
   S: 'Spike',
   T: 'Taper',
+  U: 'Unite',
   V: 'Vortex',
   W: 'Wedge',
   DB: 'Disk Ball',
@@ -30,8 +31,15 @@ const bitNames = {
   TP: 'Trans Point',
 }
 
+const assistBladeNames = {
+  B: 'Bumper',
+  R: 'Round',
+  S: 'Slash',
+  T: 'Turn',
+}
+
 const PARSE_EXPRESSION =
-  /(?:and )?(\w+(?:-\w+)?(?: \w+)?)+ ([0-9]+)-([0-9]+)([A-Z]+)/g
+  /(?:and )?(\w+(?:-\w+)?(?: \w+)?)+ ([A-Z]*)([0-9]+)-([0-9]+)([A-Z]+)/g
 
 const parseProducts = (text) => {
   const lines = text.split(/\r?\n/)
@@ -69,6 +77,9 @@ const parseProducts = (text) => {
         colour: '',
       }
 
+      // Not all matches will have an assist blade.
+      let assistBlade
+
       match.forEach((group, index) => {
         switch (index) {
           case 0:
@@ -82,16 +93,26 @@ const parseProducts = (text) => {
             break
 
           case 2:
+            // Assist blade.
+            if (group) {
+              assistBlade = {
+                name: assistBladeNames[group],
+                alias: group,
+                colour: '',
+              }
+            }
+
+          case 3:
             // Ratchet count.
             ratchet.name = group
             break
 
-          case 3:
+          case 4:
             //Ratchet height.
             ratchet.name += `-${group}`
             break
 
-          case 4:
+          case 5:
             // Bit.
             bit.name = bitNames[group]
             bit.alias = group
@@ -102,7 +123,17 @@ const parseProducts = (text) => {
         }
       })
 
-      newProduct.components = [...newProduct.components, blade, ratchet, bit]
+      if (assistBlade) {
+        newProduct.components = [
+          ...newProduct.components,
+          blade,
+          assistBlade,
+          ratchet,
+          bit,
+        ]
+      } else {
+        newProduct.components = [...newProduct.components, blade, ratchet, bit]
+      }
     })
 
     return newProduct
